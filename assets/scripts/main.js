@@ -1,17 +1,16 @@
 let scene = new Phaser.Scene("Game");
 
 scene.preload = function() {
-    // 1. загрузить бэкгранд
-    console.log("preload");
+    this.load.image('bg', 'assets/sprites/background.png');
 };
 
 scene.create = function() {
-    // 2. вывести бэкграунд
-    console.log("create");
+    const bg = this.add.sprite(0, 0, 'bg');
+    bg.setOrigin(0, 0);
 };
 
 let config = {
-    type: Phaser.AUTO, // webgl or canvas
+    type: Phaser.AUTO,
     width: 1280,
     height: 720,
     scene: scene
