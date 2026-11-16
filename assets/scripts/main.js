@@ -1,5 +1,3 @@
-import { GameScene } from "./GameScene";
-
 let scene = new GameScene();
 
 let config = {
