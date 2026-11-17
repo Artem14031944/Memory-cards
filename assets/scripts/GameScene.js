@@ -26,6 +26,7 @@ class GameScene extends Phaser.Scene {
   createCards() {
     this.cards = [];
     let positions = this.getCardsPositions();
+    Phaser.Utils.Array.Shuffle(positions);
 
     for(let value of config.cards) {
       for(let i = 0; i < 2; i++) {
