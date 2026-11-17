@@ -21,8 +21,12 @@ class GameScene extends Phaser.Scene {
     this.cards = [];
     let positions = this.getCardsPositions();
 
-    for(let position of positions) {
-      this.cards.push(new Card(this, position));
+    // for(let position of positions) {
+    //   this.cards.push(new Card(this, position));
+    // }
+
+     for(let value of config.cards) {
+      console.log(value)
     }
   }
 
