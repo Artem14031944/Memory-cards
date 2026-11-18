@@ -9,10 +9,16 @@ class Card extends Phaser.GameObjects.Sprite {
 
     this.setInteractive();
 
-    // this.on('pointerdown', this.open, this);
+    this.opened = false;
   }
 
   open() {
     this.setTexture('card' + this.value);
+    this.opened = true;
+  }
+
+  close() {
+    this.setTexture('card');
+    this.opened = false;
   }
 }
