@@ -48,7 +48,7 @@ class GameScene extends Phaser.Scene {
 
       card.close();
       card.setPosition(position.x, position.y);
-    })
+    });
   }
 
   createCards() {
