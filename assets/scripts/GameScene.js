@@ -16,10 +16,22 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.createBackground();
+    this.createText();
     this.createCards();
     this.openedCard = null;
     this.openedCardsCount = 0;
     this.start();
+  }
+
+  createBackground() {
+    this.add.sprite(0, 0, 'bg').setOrigin(0, 0);
+  }
+
+  createText() {
+    this.timeOutText = this.add.text(10, 330, 'Time:', {
+      font: '36px Arial',
+      fill:'#ffffff'
+    });
   }
 
   start() {
@@ -37,10 +49,6 @@ class GameScene extends Phaser.Scene {
       card.close();
       card.setPosition(position.x, position.y);
     })
-  }
-
-  createBackground() {
-    this.add.sprite(0, 0, 'bg').setOrigin(0, 0);
   }
 
   createCards() {
