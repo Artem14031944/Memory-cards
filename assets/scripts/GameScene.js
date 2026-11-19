@@ -29,7 +29,7 @@ class GameScene extends Phaser.Scene {
 
   createText() {
     this.timeOutText = this.add.text(10, 330, 'Time:', {
-      font: '36px Arial',
+      font: '36px CurseCasual',
       fill:'#ffffff'
     });
   }
