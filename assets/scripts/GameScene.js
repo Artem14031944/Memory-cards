@@ -12,18 +12,37 @@ class GameScene extends Phaser.Scene {
     this.load.image('card3', 'assets/sprites/card3.png');
     this.load.image('card4', 'assets/sprites/card4.png');
     this.load.image('card5', 'assets/sprites/card5.png');
+
+    this.load.audio('theme', 'assets/sounds/theme.mp3');
+    this.load.audio('complete', 'assets/sounds/complete.mp3');
+    this.load.audio('card', 'assets/sounds/card.mp3');
+    this.load.audio('success', 'assets/sounds/success.mp3');
+    this.load.audio('timeout', 'assets/sounds/timeout.mp3');
   }
 
   create() {
     this.timeout = config.timeout;
 
+    this.createSounds();
     this.createBackground();
     this.createText();
     this.createTimer();
     this.createCards();
+
     this.openedCard = null;
     this.openedCardsCount = 0;
+
     this.start();
+  }
+
+  createSounds() {
+    this.sounds = {
+      'card': this.sound.add('card'),
+      'complete': this.sound.add('complete'),
+      'theme': this.sound.add('theme'),
+      'success': this.sound.add('success'),
+      'timeout': this.sound.add('timeout'),
+    };
   }
 
   createBackground() {
