@@ -44,9 +44,9 @@ class GameScene extends Phaser.Scene {
       timeout: this.sound.add('timeout'),
     };
 
-    // this.sounds.theme.play({
-    //   volume: 0.1,
-    // });
+    this.sounds.theme.play({
+      volume: 0.1,
+    });
   }
 
   createBackground() {
