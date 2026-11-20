@@ -37,12 +37,16 @@ class GameScene extends Phaser.Scene {
 
   createSounds() {
     this.sounds = {
-      'card': this.sound.add('card'),
-      'complete': this.sound.add('complete'),
-      'theme': this.sound.add('theme'),
-      'success': this.sound.add('success'),
-      'timeout': this.sound.add('timeout'),
+      card: this.sound.add('card'),
+      complete: this.sound.add('complete'),
+      theme: this.sound.add('theme'),
+      success: this.sound.add('success'),
+      timeout: this.sound.add('timeout'),
     };
+
+    // this.sounds.theme.play({
+    //   volume: 0.1,
+    // });
   }
 
   createBackground() {
@@ -53,6 +57,7 @@ class GameScene extends Phaser.Scene {
     this.timeoutText.setText('Time: ' + this.timeout);
 
     if (this.timeout <= 0) {
+      this.sounds.timeout.play();
       this.start();
     } else {
       --this.timeout;
@@ -109,9 +114,10 @@ class GameScene extends Phaser.Scene {
     if (card.opened) {
       return false;
     }
-
+    
     if (this.openedCard) {
       if (this.openedCard.value === card.value) {
+        this.sounds.success.play();
         this.openedCard = null;
         ++this.openedCardsCount;
       } else {
@@ -123,8 +129,10 @@ class GameScene extends Phaser.Scene {
     }
 
     card.open();
+    this.sounds.card.play();
 
     if (this.openedCardsCount === this.cards.length / 2) {
+      this.sounds.complete.play();
       this.start();
     }
   }
