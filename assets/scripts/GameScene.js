@@ -93,6 +93,10 @@ class GameScene extends Phaser.Scene {
     }
 
     this.cards.forEach(card => {
+      card.opened = false;
+      card.setTexture('card');
+      card.scaleX = 1;
+
       card.move({
         x: this.sys.game.config.width + card.width,
         y: this.sys.game.config.height + card.height,
@@ -109,7 +113,7 @@ class GameScene extends Phaser.Scene {
     this.openedCardsCount = 0;
     this.timer.paused = false;
     this.initCards();
-    this.showCards();
+    this.showCards();    
   }
 
   initCards() {
@@ -193,6 +197,9 @@ class GameScene extends Phaser.Scene {
         });
       }
     }
+
+    console.log(positions);
+    
 
     this.positions = positions;
   }
