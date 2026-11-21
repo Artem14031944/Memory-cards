@@ -21,18 +21,15 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.timeout = config.timeout;
+    this.currentLevel = 0;
+    this.score = 0;
+    this.combo = 0;
 
     this.createSounds();
     this.createBackground();
     this.createText();
     this.createTimer();
-    this.createCards();
-
-    this.openedCard = null;
-    this.openedCardsCount = 0;
-
-    this.start();
+    this.loadLevel(this.currentLevel);
   }
 
   createSounds() {
@@ -53,8 +50,36 @@ class GameScene extends Phaser.Scene {
     this.add.sprite(0, 0, 'bg').setOrigin(0, 0);
   }
 
+  createText() {
+    this.levelText = this.add.text(10, 280, '', {
+      font: '24px CurseCasual',
+      fill: '#ffffff',
+    });
+
+    this.timeoutText = this.add.text(10, 310, '', {
+      font: '24px CurseCasual',
+      fill: '#ffffff',
+    });  
+
+    this.scoreText = this.add.text(10, 340, '', {
+      font: '24px CurseCasual',
+      fill: '#ffffff',
+    });
+  }
+
+  createTimer() {
+    this.timer = this.time.addEvent({
+      delay: 1000,
+      loop: true,
+      callback: this.onTimerTick,
+      callbackScope: this,
+    });
+  }
+
   onTimerTick() {
     this.timeoutText.setText('Time: ' + this.timeout);
+    this.levelText.setText('Level: ' + (this.currentLevel + 1));
+    this.scoreText.setText('Score: ' + this.score);
 
     if (this.timeout <= 0) {
       this.timer.paused = true;
@@ -65,20 +90,36 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  createTimer() {
-   this.timer = this.time.addEvent({
-      delay: 1000,
-      loop: true,
-      callback: this.onTimerTick,
-      callbackScope: this,
-    });
-  }
+  loadLevel(levelIndex) {
+    const levelConfig = levels[levelIndex];
+    
+    config.rows = levelConfig.rows;
+    config.cols = levelConfig.cols;
+    config.cards = [];
+    for (let i = 1; i <= levelConfig.pairs; i++) {
+      config.cards.push(i);
+    }
+    config.timeout = levelConfig.time;
 
-  createText() {
-    this.timeoutText = this.add.text(10, 330, '', {
-      font: '36px CurseCasual',
-      fill:'#ffffff',
-    });
+    this.timeout = config.timeout;
+    this.openedCard = null;
+    this.openedCardsCount = 0;
+    this.combo = 0;
+    
+    this.timer.paused = false;
+
+    this.levelText.setText('Level: ' + (this.currentLevel + 1));
+    this.scoreText.setText('Score: ' + this.score);
+    this.timeoutText.setText('Time: ' + this.timeout);
+
+    if (this.cards) {
+      this.cards.forEach(card => card.destroy());
+    }
+
+    this.createCards();
+    this.initCardsPositions();
+    this.initCards();
+    this.showCards();
   }
 
   restart() {
@@ -86,9 +127,8 @@ class GameScene extends Phaser.Scene {
 
     const onCardsMoveComplete = () => {
       ++count;
-
-      if (count >= this.cards.length) {   
-        this.start();
+      if (count >= this.cards.length) {
+        this.loadLevel(this.currentLevel);
       }
     }
 
@@ -103,43 +143,25 @@ class GameScene extends Phaser.Scene {
         delay: card.position.delay,
         callback: onCardsMoveComplete,
       });
-    }); 
-  }
-
-  start() {
-    this.initCardsPositions();
-    this.timeout = config.timeout;
-    this.openedCard = null;
-    this.openedCardsCount = 0;
-    this.timer.paused = false;
-    this.initCards();
-    this.showCards();    
-  }
-
-  initCards() {
-    let positions = Phaser.Utils.Array.Shuffle(this.positions);
-
-    this.cards.forEach((card) => {
-      card.init(positions.pop());
     });
   }
 
-  showCards() {
-    this.cards.forEach(card => {
-      card.depth = card.position.delay;
-      card.move({
-        x: card.position.x,
-        y: card.position.y,
-        delay: card.position.delay,
-      });
-    })
+  nextLevel() {
+    this.currentLevel++;
+    
+    if (this.currentLevel >= levels.length) {
+      this.scoreText.setText('You Win! Score: ' + this.score);
+      return;
+    }
+
+    this.restart();
   }
 
   createCards() {
     this.cards = [];
 
-    for(let value of config.cards) {
-      for(let i = 0; i < 2; i++) {
+    for (let value of config.cards) {
+      for (let i = 0; i < 2; i++) {
         this.cards.push(new Card(this, value));
       }
     }
@@ -153,26 +175,56 @@ class GameScene extends Phaser.Scene {
     }
 
     this.sounds.card.play();
-      
+
     if (this.openedCard) {
       if (this.openedCard.value === card.value) {
         this.sounds.success.play();
         this.openedCard = null;
         ++this.openedCardsCount;
+        this.combo++;
+        this.addScore();
       } else {
         this.openedCard.close();
         this.openedCard = card;
+        this.combo = 0;
       }
     } else {
       this.openedCard = card;
     }
 
     card.open(() => {
-      if (this.openedCardsCount === this.cards.length / 2) {   
-          this.sounds.complete.play();
-          this.restart();
-        }
+      if (this.openedCardsCount === this.cards.length / 2) {
+        this.timer.paused = true;
+        this.sounds.complete.play();
+        this.nextLevel();
+      }
     });
+  }
+
+  addScore() {
+    let points = 0;
+    
+    switch (this.combo) {
+      case 1:
+        points = 100;
+        break;
+      case 2:
+        points = 250;
+        break;
+      case 3:
+        points = 500;
+        break;
+      case 4:
+        points = 1000;
+        break;
+      default:
+        if (this.combo >= 5) {
+          points = 5000;
+        }
+    }
+
+    this.score += points;
+    this.scoreText.setText('Score: ' + this.score);
   }
 
   initCardsPositions() {
@@ -187,20 +239,36 @@ class GameScene extends Phaser.Scene {
 
     let id = 0;
 
-    for(let row = 0; row < config.rows; row++) {
-      for(let col = 0; col < config.cols; col++) {
-        ++id; 
-        positions.push({ 
+    for (let row = 0; row < config.rows; row++) {
+      for (let col = 0; col < config.cols; col++) {
+        ++id;
+        positions.push({
           delay: id * 100,
-          x: offsetX + col * cardWidth, 
+          x: offsetX + col * cardWidth,
           y: offsetY + row * cardHeight,
         });
       }
     }
 
-    console.log(positions);
-    
-
     this.positions = positions;
+  }
+
+  showCards() {
+    this.cards.forEach(card => {
+      card.depth = card.position.delay;
+      card.move({
+        x: card.position.x,
+        y: card.position.y,
+        delay: card.position.delay,
+      });
+    })
+  }
+
+  initCards() {
+    let positions = Phaser.Utils.Array.Shuffle(this.positions);
+
+    this.cards.forEach((card) => {
+      card.init(positions.pop());
+    });
   }
 }
